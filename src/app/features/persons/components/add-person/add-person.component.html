@@ -1,0 +1,41 @@
+<div class="add-person-container">
+    <h2>Add New Person</h2>
+    
+    <form [formGroup]="personForm" (ngSubmit)="onSubmit()" class="person-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="personForm.get('name')?.hasError('required')">
+          Name is required
+        </mat-error>
+      </mat-form-field>
+  
+      <mat-form-field appearance="outline">
+        <mat-label>Age</mat-label>
+        <input matInput type="number" formControlName="age" required>
+        <mat-error *ngIf="personForm.get('age')?.hasError('required')">
+          Age is required
+        </mat-error>
+        <mat-error *ngIf="personForm.get('age')?.hasError('min')">
+          Age must be at least 1
+        </mat-error>
+      </mat-form-field>
+  
+      <mat-radio-group formControlName="gender" class="gender-radio-group">
+        <mat-radio-button value="true">Male</mat-radio-button>
+        <mat-radio-button value="false">Female</mat-radio-button>
+      </mat-radio-group>
+  
+      <button mat-raised-button color="primary" type="submit" [disabled]="!personForm.valid">
+        <mat-icon>person_add</mat-icon>
+        Add Person
+      </button>
+    </form>
+  
+    <div *ngIf="lastAddedPerson" class="last-added">
+      <h3>Last Added Person:</h3>
+      <p>Name: {{ lastAddedPerson.name }}</p>
+      <p>Age: {{ lastAddedPerson.age }}</p>
+      <p>Gender: {{ lastAddedPerson.gender ? 'Male' : 'Female' }}</p>
+    </div>
+  </div>

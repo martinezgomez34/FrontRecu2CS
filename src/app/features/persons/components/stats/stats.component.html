@@ -1,0 +1,33 @@
+<div class="stats-container">
+    <h2>Gender Statistics</h2>
+    
+    <div *ngIf="loading" class="loading-indicator">
+      <mat-spinner diameter="30"></mat-spinner>
+      <span>Loading statistics...</span>
+    </div>
+  
+    <div *ngIf="stats" class="stats-content">
+      <div class="stat-item">
+        <span class="stat-label">Male:</span>
+        <span class="stat-value">{{ stats.male }}</span>
+      </div>
+      
+      <div class="stat-item">
+        <span class="stat-label">Female:</span>
+        <span class="stat-value">{{ stats.female }}</span>
+      </div>
+  
+      <div *ngIf="stats.status" class="status-message">
+        {{ stats.status === 'updated' ? 'Data has been updated' : 'Request timed out' }}
+      </div>
+  
+      <div *ngIf="lastUpdate" class="last-update">
+        Last updated: {{ lastUpdate | date:'mediumTime' }}
+      </div>
+  
+      <button mat-raised-button color="primary" (click)="loadStats()" [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+        Refresh Stats
+      </button>
+    </div>
+  </div>
