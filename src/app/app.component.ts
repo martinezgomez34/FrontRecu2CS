@@ -11,5 +11,5 @@ import { StatsComponent } from "./features/persons/components/stats/stats.compon
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Front';
+  title = '233355';
 }

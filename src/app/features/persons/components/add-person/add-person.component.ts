@@ -36,7 +36,7 @@ export class AddPersonComponent {
       const personData = {
         name: this.personForm.value.name,
         age: this.personForm.value.age,
-        gender: this.personForm.value.gender === 'true' // Convertir a boolean
+        gender: this.personForm.value.gender === 'true' 
       };
 
       this.personService.addPerson(personData).subscribe({
