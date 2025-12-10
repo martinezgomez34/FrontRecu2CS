@@ -1,41 +1,121 @@
+<!-- add-person.component.html -->
 <div class="add-person-container">
-    <h2>Add New Person</h2>
-    
-    <form [formGroup]="personForm" (ngSubmit)="onSubmit()" class="person-form">
-      <mat-form-field appearance="outline">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" required>
-        <mat-error *ngIf="personForm.get('name')?.hasError('required')">
-          Name is required
-        </mat-error>
-      </mat-form-field>
+  <h2>Add New Person</h2>
   
-      <mat-form-field appearance="outline">
-        <mat-label>Age</mat-label>
-        <input matInput type="number" formControlName="age" required>
-        <mat-error *ngIf="personForm.get('age')?.hasError('required')">
-          Age is required
-        </mat-error>
-        <mat-error *ngIf="personForm.get('age')?.hasError('min')">
-          Age must be at least 1
-        </mat-error>
-      </mat-form-field>
-  
-      <mat-radio-group formControlName="gender" class="gender-radio-group">
-        <mat-radio-button value="true">Male</mat-radio-button>
-        <mat-radio-button value="false">Female</mat-radio-button>
-      </mat-radio-group>
-  
-      <button mat-raised-button color="primary" type="submit" [disabled]="!personForm.valid">
-        <mat-icon>person_add</mat-icon>
-        Add Person
+  <!-- Formulario para agregar personas -->
+  <form [formGroup]="personForm" (ngSubmit)="onSubmit()" class="person-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required>
+      <mat-error *ngIf="personForm.get('name')?.hasError('required')">
+        Name is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Age</mat-label>
+      <input matInput type="number" formControlName="age" required>
+      <mat-error *ngIf="personForm.get('age')?.hasError('required')">
+        Age is required
+      </mat-error>
+      <mat-error *ngIf="personForm.get('age')?.hasError('min')">
+        Age must be at least 1
+      </mat-error>
+    </mat-form-field>
+
+    <mat-radio-group formControlName="gender" class="gender-radio-group">
+      <mat-radio-button value="true">Male</mat-radio-button>
+      <mat-radio-button value="false">Female</mat-radio-button>
+    </mat-radio-group>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="!personForm.valid" class="submit-button">
+      <mat-icon>person_add</mat-icon>
+      Add Person
+    </button>
+
+    <!-- Controles de actualización automática -->
+    <div class="update-controls">
+      <button mat-stroked-button type="button" (click)="toggleAutoUpdate()" 
+              [color]="isPollingActive ? 'warn' : 'primary'">
+        <mat-icon>{{ isPollingActive ? 'pause' : 'play_arrow' }}</mat-icon>
+        {{ isPollingActive ? 'Pause Auto-update' : 'Enable Auto-update' }}
       </button>
-    </form>
-  
-    <div *ngIf="lastAddedPerson" class="last-added">
-      <h3>Last Added Person:</h3>
-      <p>Name: {{ lastAddedPerson.name }}</p>
-      <p>Age: {{ lastAddedPerson.age }}</p>
-      <p>Gender: {{ lastAddedPerson.gender ? 'Male' : 'Female' }}</p>
+      
+      <button mat-stroked-button type="button" (click)="forceRefresh()">
+        <mat-icon>refresh</mat-icon>
+        Refresh Now
+      </button>
     </div>
+  </form>
+
+  <!-- Última persona agregada -->
+  <div *ngIf="lastAddedPerson" class="last-added">
+    <h3>Last Added Person:</h3>
+    <p><strong>Name:</strong> {{ lastAddedPerson.name }}</p>
+    <p><strong>Age:</strong> {{ lastAddedPerson.age }}</p>
+    <p><strong>Gender:</strong> {{ getGenderText(lastAddedPerson.gender) }}</p>
   </div>
+
+  <!-- Lista de todas las personas -->
+  <div class="all-persons-section">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          All Persons
+          <mat-badge [matBadge]="allPersons.length" matBadgeColor="primary" class="person-count-badge"></mat-badge>
+        </mat-card-title>
+        <mat-card-subtitle>
+          <div class="polling-status">
+            <mat-icon [class.active]="isPollingActive" class="status-icon">
+              {{ isPollingActive ? 'sync' : 'sync_disabled' }}
+            </mat-icon>
+            <span>{{ isPollingActive ? 'Auto-update active (every 3s)' : 'Auto-update paused' }}</span>
+          </div>
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <!-- Indicador de carga -->
+        <div *ngIf="isLoading && allPersons.length === 0" class="loading-spinner">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading persons...</p>
+        </div>
+
+        <!-- Mensaje cuando no hay personas -->
+        <div *ngIf="!isLoading && allPersons.length === 0" class="no-persons">
+          <mat-icon>people_outline</mat-icon>
+          <p>No persons found. Add a new person using the form.</p>
+        </div>
+
+        <!-- Lista de personas -->
+        <mat-list *ngIf="allPersons.length > 0" class="persons-list">
+          <mat-list-item *ngFor="let person of allPersons; let i = index" class="person-item">
+            <mat-icon matListItemIcon [class.male]="person.gender" [class.female]="!person.gender">
+              {{ getGenderIcon(person.gender) }}
+            </mat-icon>
+            
+            <div matListItemTitle>
+              <strong>{{ person.name }}</strong>
+              <span class="person-age">({{ person.age }} years)</span>
+            </div>
+            
+            <div matListItemLine class="person-details">
+              <span class="gender-badge" [class.male]="person.gender" [class.female]="!person.gender">
+                {{ getGenderText(person.gender) }}
+              </span>
+              <span class="person-index">#{{ i + 1 }}</span>
+            </div>
+            
+            <mat-divider *ngIf="i < allPersons.length - 1"></mat-divider>
+          </mat-list-item>
+        </mat-list>
+
+        <!-- Mensaje de error -->
+        <div *ngIf="errorMessage" class="error-message">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
